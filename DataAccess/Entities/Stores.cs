@@ -12,7 +12,7 @@ namespace DataAccess.Entities
 
         public int StoreId { get; set; }
         public string Location { get; set; }
-        public string PhoneNumber { get; set; }
+        public long PhoneNumber { get; set; }
 
         public virtual ICollection<OrderHistory> OrderHistory { get; set; }
     }
