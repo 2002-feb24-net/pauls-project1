@@ -58,14 +58,14 @@ stages:
 
     steps:
 
-  - task: SonarCloudPrepare@1
-    inputs:
-      SonarCloud: 'sonarcloud-PStewart1'
-      organization: '2002-feb24-net'
-      scannerMode: 'MSBuild'
-      projectKey: '2002-feb24-net_pauls-project1'
-      projectName: 'Pauls-Project1'
-    displayName: sonarcloud analysis prepare
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'sonarcloud-PStewart1'
+        organization: '2002-feb24-net'
+        scannerMode: 'MSBuild'
+        projectKey: '2002-feb24-net_pauls-project1'
+        projectName: 'Pauls-Project1'
+      displayName: sonarcloud analysis prepare
 
     - task: UseDotNet@2
       inputs:
