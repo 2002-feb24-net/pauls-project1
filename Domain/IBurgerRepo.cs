@@ -55,6 +55,12 @@ namespace Domain
             void AddOrder(OrderHistory order, int storeId, int custId );
 
             /// <summary>
+            /// Delete a review by ID.
+            /// </summary>
+            /// <param name="reviewId">The ID of the review</param>
+            void DeleteOrder(int orderId);
+
+            /// <summary>
             /// Update an order.
             /// </summary>
             /// <param name="order">The order with changed values</param>

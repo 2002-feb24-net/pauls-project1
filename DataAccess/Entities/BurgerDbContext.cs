@@ -20,7 +20,6 @@ namespace DataAccess.Entities
         public virtual DbSet<OrderHistory> OrderHistory { get; set; }
         public virtual DbSet<Stores> Stores { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Customers>(entity =>
@@ -49,6 +48,12 @@ namespace DataAccess.Entities
                 entity.Property(e => e.Product)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.Inventory)
+                    .HasForeignKey(d => d.StoreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Inventory__Store__1CBC4616");
             });
 
             modelBuilder.Entity<OrderHistory>(entity =>
@@ -89,8 +94,6 @@ namespace DataAccess.Entities
             {
                 entity.HasKey(e => e.StoreId)
                     .HasName("PK__Stores__3214EC07854665A3");
-
-                entity.Property(e => e.AvgReviewScore).HasColumnType("decimal(3, 1)");
 
                 entity.Property(e => e.Location)
                     .IsRequired()

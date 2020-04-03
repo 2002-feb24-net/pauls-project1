@@ -7,9 +7,10 @@ namespace DataAccess.Entities
     {
         public int Id { get; set; }
         public string Product { get; set; }
+        public int StoreId { get; set; }
+        public int Quantity { get; set; }
         public decimal? Price { get; set; }
-        public int LeominsterQuantity { get; set; }
-        public int GardnerQuantity { get; set; }
-        public int WorcesterQuantity { get; set; }
+
+        public virtual Stores Store { get; set; }
     }
 }
