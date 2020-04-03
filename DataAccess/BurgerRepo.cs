@@ -115,6 +115,27 @@ namespace DataAccess
             _dbContext.Add(entity);
         }
 
+
+        public IEnumerable<Domain.Models.Customer> GetCustomers(string search = null)
+        {
+            IEnumerable<Entities.Customers> items = _dbContext.Customers
+                .AsNoTracking();
+
+            items = items.Where(c => c.LastName.Contains(search)).AsEnumerable();
+
+            IEnumerable<Domain.Models.Customer> newItems = items.Select(cust =>
+            new Customer
+            {
+                Id = cust.Id,
+                FirstName = cust.FirstName,
+                LastName = cust.LastName,
+                Address = cust.Address,
+                PhoneNumber = Int64.Parse(cust.PhoneNumber)
+            });
+
+            return newItems;
+        }
+
         public void DeleteCustomer(int custId)
         {
             _logger.LogInformation("Deleting customer with ID {custId}", custId);
@@ -145,6 +166,7 @@ namespace DataAccess
 
             Customer customer = new Customer
             {
+                Id = cust.Id,
                 FirstName = cust.FirstName,
                 LastName = cust.LastName,
                 Address = cust.Address,
@@ -163,6 +185,7 @@ namespace DataAccess
             IEnumerable<Customer> newItems = items.Select(c =>
             new Customer
             {
+                Id = c.Id,
                 FirstName = c.FirstName,
                 LastName = c.LastName,
                 Address = c.Address,

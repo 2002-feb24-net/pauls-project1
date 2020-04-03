@@ -32,6 +32,9 @@ namespace Domain
         /// <param name="cust">The customer</param>
         void AddCustomer(Customer cust);
 
+        IEnumerable<Domain.Models.Customer> GetCustomers(string search = null);
+
+
         /// <summary>
         /// Delete a customer by ID. Any orders associated to it will also be deleted.
         /// </summary>
