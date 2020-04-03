@@ -10,25 +10,26 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-#- script: echo Hello, world!
-  #displayName: Print hello world
 
-#- script: |
-  #  echo Showing current directory contents.
-  #  ls
-  #displayName: 'Show directory contents'
+# - script: echo Hello, world!
+#   displayName: Print hello world
 
-  script: dotnet build
+# - script: |
+#     echo "Showing current directory contents"
+#     ls
+#   displayName: Show directory contents
+
+- script: dotnet build
   displayName: dotnet build
 
-  #script: dotnet test
-  #continueOnError: true
-  #displayName: dotnet test
+#  script: dotnet test
+#  continueOnError: true
+#  displayName: dotnet test
 
-  script: dotnet test <test-project> --logger trx
+- script: dotnet test --logger trx
   displayName: dotnet test
 
-  task: PublishTestResults@2
+- task: PublishTestResults@2
   condition: succeededOrFailed()
   inputs: 
     testRunner: VSTest
