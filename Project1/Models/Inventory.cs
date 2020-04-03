@@ -14,23 +14,17 @@ namespace Project1.Models
         [Required]
         public string Product { get; set; }
 
+        [Display(Name = "Store Number")]
+        [Required]
+        public int StoreId { get; set; }
+
+        [Display(Name = "Quantity")]
+        [Required]
+        [Range(0, 999)]
+        public int Quantity { get; set; }
+
         [Range(0, 999)]
         [DisplayFormat(DataFormatString = "{0:C}")]
         public decimal? Price { get; set; }
-
-        [Display(Name = "Leominster Quantity")]
-        [Required]
-        [Range(0, 999)]
-        public int LeominsterQuantity { get; set; }
-
-        [Display(Name = "Gardner Quantity")]
-        [Required]
-        [Range(0, 999)]
-        public int GardnerQuantity { get; set; }
-
-        [Display(Name = "Worcester Quantity")]
-        [Required]
-        [Range(0, 999)]
-        public int WorcesterQuantity { get; set; }
     }
 }

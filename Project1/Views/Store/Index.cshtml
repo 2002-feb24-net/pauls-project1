@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DataAccess.Entities.Stores>
+﻿@model IEnumerable<Project1.Models.Store>
 
 @{
     ViewData["Title"] = "Index";
@@ -31,9 +31,9 @@
                 @Html.DisplayFor(modelItem => item.PhoneNumber)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.StoreId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.StoreId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.StoreId">Delete</a>
+                @Html.ActionLink("Edit", "Edit", new { id = item.StoreId }) |
+                @Html.ActionLink("Details", "Details", new { id = item.StoreId }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.StoreId })
             </td>
         </tr>
 }

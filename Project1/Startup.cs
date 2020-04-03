@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataAccess;
 using DataAccess.Entities;
+using Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Porject1
+namespace Project1
 {
     public class Startup
     {
@@ -27,6 +29,8 @@ namespace Porject1
         {
             services.AddDbContext<BurgerDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BurgerDb")));
+
+            services.AddScoped<IBurgerRepo, BurgerRepo>();
 
             services.AddControllersWithViews();
         }

@@ -12,7 +12,7 @@ namespace Project1.Models
         public int StoreId { get; set; }
 
         [Required]
-        public int Location { get; set; }
+        public string Location { get; set; }
 
         [Display(Name = "Phone Number")]
         [Required]

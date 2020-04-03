@@ -54,6 +54,46 @@ namespace DataAccess
             return newItem;
         }
 
+        public void AddStore(Store store)
+        {
+            if (store.StoreId != 0)
+            {
+                _logger.LogWarning("Store to be added has an ID ({storeId}) already: ignoring.", store.StoreId);
+            }
+
+            _logger.LogInformation("Adding store");
+
+            Stores entity = new Stores
+            {
+                Location = store.Location,
+                PhoneNumber = store.PhoneNumber.ToString()
+            };
+
+            entity.StoreId = 0;
+            _dbContext.Add(entity);
+        }
+
+        public void DeleteStore(int storeId)
+        {
+            _logger.LogInformation("Deleting store with ID {storeId}", storeId);
+            Stores entity = _dbContext.Stores.Find(storeId);
+            _dbContext.Remove(entity);
+        }
+
+        public void UpdateStore(Store store)
+        {
+            _logger.LogInformation("Updating store with ID {storeId}", store.StoreId);
+
+            Stores currentEntity = _dbContext.Stores.Find(store.StoreId);
+            Stores newEntity = new Stores
+            {
+                Location = store.Location,
+                PhoneNumber = store.PhoneNumber.ToString()
+            };
+
+            _dbContext.Entry(currentEntity).CurrentValues.SetValues(newEntity);
+        }
+
         public void AddCustomer(Customer cust)
         {
             if (cust.Id != 0)
@@ -113,6 +153,25 @@ namespace DataAccess
             return customer;
         }
 
+        public IEnumerable<Customer> GetCustomerByName(string search = null)
+        {
+            IEnumerable<Customers> items = _dbContext.Customers
+                .AsNoTracking();
+
+            items = items.Where(c => c.LastName.Contains(search)).AsEnumerable();
+
+            IEnumerable<Customer> newItems = items.Select(c =>
+            new Customer
+            {
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                Address = c.Address,
+                PhoneNumber = Int64.Parse(c.PhoneNumber)
+            });
+
+            return newItems;
+        }
+
         public void AddOrder(Domain.Models.OrderHistory order)
         {
             if (order.OrderId != 0)
@@ -163,7 +222,7 @@ namespace DataAccess
             _dbContext.Entry(currentEntity).CurrentValues.SetValues(newEntity);
         }
 
-        public IEnumerable<Domain.Models.OrderHistory> OrderHistoryFromCustomerId(int custId)
+        public IEnumerable<Domain.Models.OrderHistory> OrderHistoryByCustomerId(int custId)
         {
             IEnumerable<Entities.OrderHistory> items = _dbContext.OrderHistory
                 .AsNoTracking();
@@ -185,7 +244,7 @@ namespace DataAccess
             return newItems;
         }
 
-        public IEnumerable<Domain.Models.OrderHistory> OrderHistoryFromStoreId(int storeId)
+        public IEnumerable<Domain.Models.OrderHistory> OrderHistoryByStoreId(int storeId)
         {
             IEnumerable<Entities.OrderHistory> items = _dbContext.OrderHistory
                 .AsNoTracking();
@@ -205,6 +264,17 @@ namespace DataAccess
             });
 
             return newItems;
+        }
+
+        public void DecrementInventory(string product, int storeId)
+        {
+            _logger.LogInformation("Decrementing Inventory with Product {product}, from store with Id {storeId}", product, storeId);
+
+            Entities.Inventory entity = _dbContext.Inventory
+                .Where(p => p.Product == product && p.StoreId == storeId)
+                .SingleOrDefault();
+
+            entity.Quantity -= 1;
         }
 
         public void Save()
