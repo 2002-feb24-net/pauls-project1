@@ -10,10 +10,39 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: Print hello world
+#- script: echo Hello, world!
+  #displayName: Print hello world
 
-- script: |
-    echo Showing current directory contents.
-    ls
-  displayName: 'Show directory contents'
+#- script: |
+  #  echo Showing current directory contents.
+  #  ls
+  #displayName: 'Show directory contents'
+
+  script: dotnet build
+  displayName: dotnet build
+
+  #script: dotnet test
+  #continueOnError: true
+  #displayName: dotnet test
+
+  script: dotnet test <test-project> --logger trx
+  displayName: dotnet test
+
+  task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs: 
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure subscription 1(34c1f765-2be7-443c-b6cc-1dfb59828d08)'
+    appType: 'webApp'
+    WebAppName: 'PaulsMvcStarterProject'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
