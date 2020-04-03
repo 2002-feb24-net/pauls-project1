@@ -1,4 +1,4 @@
-﻿@model DataAccess.Entities.OrderHistory
+﻿@model Project1.Models.OrderHistory
 
 @{
     ViewData["Title"] = "Delete";
@@ -41,18 +41,6 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.TotalPrice)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Customer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Customer.FirstName)
-        </dd class>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Store)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Store.Location)
-        </dd class>
     </dl>
     
     <form asp-action="Delete">

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DataAccess.Entities.OrderHistory>
+﻿@model IEnumerable<Project1.Models.OrderHistory>
 
 @{
     ViewData["Title"] = "Index";
@@ -27,12 +27,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.TotalPrice)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Store)
-            </th>
+            
             <th></th>
         </tr>
     </thead>
@@ -54,12 +49,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.TotalPrice)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Store.Location)
-            </td>
+            
             <td>
                 <a asp-action="Edit" asp-route-id="@item.OrderId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.OrderId">Details</a> |
