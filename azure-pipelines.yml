@@ -65,6 +65,8 @@ stages:
         scannerMode: 'MSBuild'
         projectKey: '2002-feb24-net_pauls-project1'
         projectName: 'Pauls-Project1'
+        extraProperties: |
+          sonar.exclusions=**/lib/**
       displayName: sonarcloud analysis prepare
 
     - task: UseDotNet@2
