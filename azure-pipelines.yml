@@ -67,6 +67,7 @@ stages:
         projectName: 'Pauls-Project1'
         extraProperties: |
           sonar.exclusions=**/lib/**
+      continueOnError: true
       displayName: sonarcloud analysis prepare
 
     - task: UseDotNet@2
@@ -89,6 +90,7 @@ stages:
       displayName: dotnet test
 
     - task: SonarCloudAnalyze@1
+      continueOnError: true
       displayName: sonarcloud analysis run
 
     - task: PublishTestResults@2
