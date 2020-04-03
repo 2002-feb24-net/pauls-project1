@@ -135,9 +135,9 @@ stages:
 
           - task: AzureRmWebAppDeployment@4
             inputs:
-              ConnectionType: AzureRM
+              ConnectionType: 'AzureRM'
               azureSubscription: 'Azure subscription 1(4)(34c1f765-2be7-443c-b6cc-1dfb59828d08)'
               appType: 'webApp'
-              WebAppName: 'PaulsMvcStarterProject'
-              packageForLinux: $(Pipeline.Workspace)/app
-            displayName: vd
+              WebAppName: 'GoodBurger'
+              packageForLinux: '$(Pipeline.Workspace)/app'
+            displayName: Website Deployment
