@@ -104,3 +104,4 @@ stages:
               WebAppName: 'GoodBurger'
               packageForLinux: '$(Pipeline.Workspace)/app'
             displayName: Website Deployment
+          - task: PublishBuildArtifacts@1
