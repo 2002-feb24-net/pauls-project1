@@ -50,6 +50,13 @@ stages:
 
     - task: DotNetCoreCLI@2
       inputs:
+        command: 'restore'
+        projects: './Project1/*.sln'
+        feedsToUse: 'select'
+        vstsFeed: '9f33db03-6ee0-4e3c-b45e-5353f9f1f51d'
+
+    - task: DotNetCoreCLI@2
+      inputs:
         command: publish
         publishWebProjects: true
         arguments:
