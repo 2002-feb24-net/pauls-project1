@@ -1,4 +1,4 @@
-﻿@model Project1.Models.Store
+﻿@model Project1.ViewModels.Store
 
 @{
     ViewData["Title"] = "Details";
@@ -6,25 +6,35 @@
 
 <h1>Store Details</h1>
 
-<div>
-    <h4>Store</h4>
+<div class="form-group">
+    <h4>Is this the Store you would like to order from?</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Location)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Location)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhoneNumber)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.StoreId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @*<form asp-controller="Orders" asp-action="StoreHistory">
+        <input type="submit" value="See Order History" id="@Model.StoreId" class="btn btn-primary" />
+    </form>*@
+    <br />
+    <form asp-action="Details" method="post">
+        <input type="submit" value="Continue to Order" id="@Model.StoreId" class="btn btn-primary" />
+    </form>
+    <div>
+        @Html.ActionLink("See Order History", "StoreHistory", "Orders", new { storeId = Model.StoreId })
+    </div>
+    <a asp-controller="Store" asp-action="Index">Back to Store Selection</a>
 </div>
+@*asp-controller="Orders" asp-action="Menu"*@

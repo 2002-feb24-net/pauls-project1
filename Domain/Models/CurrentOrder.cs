@@ -4,25 +4,25 @@ using System.Text;
 
 namespace Domain.Models
 {
-    public class OrderHistory
+    public class CurrentOrder
     {
         private string _order;
         private decimal? _totalPrice;
-        public int OrderId { get; set; }
+        public int Id { get; set; }
+        public int? OrderId { get; set; }
         public string CustomerName { get; set; }
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
         public string Location { get; set; }
-        public int StoreId { get; set; }
-        public DateTime? DateTime { get; set; }
-
+        public int? StoreId { get; set; }
+        
         public string Order
         {
             get => _order;
             set => _order = value ?? "";
         }
-        public decimal? TotalPrice 
-        { 
-            get => _totalPrice; 
+        public decimal? TotalPrice
+        {
+            get => _totalPrice;
             set
             {
                 if (value < 0)
@@ -35,3 +35,4 @@ namespace Domain.Models
 
     }
 }
+

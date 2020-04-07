@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Project1.Models
+namespace Project1.ViewModels
 {
     public class OrderHistory
     {
@@ -19,7 +19,7 @@ namespace Project1.Models
         public int CustomerId { get; set; }
 
         [Required]
-        public int Location { get; set; }
+        public string Location { get; set; }
 
         [Display(Name = "Store Number")]
         public int StoreId { get; set; }

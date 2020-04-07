@@ -15,6 +15,7 @@ namespace DataAccess.Entities
         {
         }
 
+        public virtual DbSet<CurrentOrder> CurrentOrder { get; set; }
         public virtual DbSet<Customers> Customers { get; set; }
         public virtual DbSet<Inventory> Inventory { get; set; }
         public virtual DbSet<OrderHistory> OrderHistory { get; set; }
@@ -22,6 +23,22 @@ namespace DataAccess.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CurrentOrder>(entity =>
+            {
+                entity.Property(e => e.CustomerName).HasMaxLength(50);
+
+                entity.Property(e => e.Location).HasMaxLength(50);
+
+                entity.Property(e => e.Order).HasMaxLength(100);
+
+                entity.Property(e => e.TotalPrice).HasColumnType("money");
+
+                entity.HasOne(d => d.OrderNavigation)
+                    .WithMany(p => p.CurrentOrder)
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("FK__CurrentOr__Order__1F98B2C1");
+            });
+
             modelBuilder.Entity<Customers>(entity =>
             {
                 entity.Property(e => e.Address).HasMaxLength(50);

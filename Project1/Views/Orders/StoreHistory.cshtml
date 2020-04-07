@@ -1,0 +1,78 @@
+﻿@model IEnumerable<Project1.ViewModels.OrderHistory>
+
+@{
+    ViewData["Title"] = "StoreHistory";
+}
+
+<h1>Store Order History</h1>
+
+<h4>@Model.FirstOrDefault().Location </h4>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderId)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.CustomerName)
+                </th>
+            @*<th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>*@
+            <th>
+                @Html.DisplayNameFor(model => model.DateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Order)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalPrice)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+
+
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CustomerName)
+                </td>
+                @*<td>
+                    @Html.DisplayFor(modelItem => item.Location)
+                </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Order)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalPrice)
+                </td>
+                <td>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+
+</table>
+@*<input type="submit" value="Continue" class="btn btn-primary" />*@
+
+<div>
+    <a asp-controller="Customer" asp-action="Details" asp-route-id="@Model.First().CustomerId">Back</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

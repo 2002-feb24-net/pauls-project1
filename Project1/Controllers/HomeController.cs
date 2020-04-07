@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Porject1.Models;
+using Project1.ViewModels;
 
 namespace Project1.Controllers
 {

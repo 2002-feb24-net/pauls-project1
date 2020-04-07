@@ -1,0 +1,37 @@
+﻿@model Project1.ViewModels.Login
+
+@{
+    ViewData["Title"] = "LoginCustomer";
+}
+
+<h1>Customer Login</h1>
+
+<form asp-action="LoginCustomer">
+    <fieldset>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="FirstName" class="control-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="LastName" class="control-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+    </fieldset>
+</form>
+<div>
+    <a asp-action="AddCustomer">Create New Customer</a>
+</div>
+@*<div>
+    <a asp-action="LoginManager">Manager Login</a>
+</div>*@
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

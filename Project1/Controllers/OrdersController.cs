@@ -5,161 +5,303 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DataAccess.Entities;
+using Domain;
+using Domain.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Http;
 
 namespace Project1.Controllers
 {
     public class OrdersController : Controller
     {
-        private readonly BurgerDbContext _context;
+        public IBurgerRepo Repo { get; }
 
-        public OrdersController(BurgerDbContext context)
-        {
-            _context = context;
-        }
+        public OrdersController(IBurgerRepo repo) =>
+            Repo = repo ?? throw new ArgumentNullException(nameof(repo));
 
         // GET: Orders
-        public async Task<IActionResult> Index()
+        public ActionResult Index([FromQuery]int storeId = 1)
         {
-            var burgerDbContext = _context.OrderHistory.Include(o => o.Customer).Include(o => o.Store);
-            return View(await burgerDbContext.ToListAsync());
-        }
-
-        // GET: Orders/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var orderHistory = await _context.OrderHistory
-                .Include(o => o.Customer)
-                .Include(o => o.Store)
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (orderHistory == null)
-            {
-                return NotFound();
-            }
-
-            return View(orderHistory);
-        }
-
-        // GET: Orders/Create
-        public IActionResult Create()
-        {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FirstName");
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Location");
+            
             return View();
         }
 
-        // POST: Orders/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //GET: Orders/Menu
+        public ActionResult Menu()
+        {
+            IEnumerable<Inventory> menu = Repo.DisplayMenu(1);
+            IEnumerable<ViewModels.Inventory> viewModels = menu.Select(m =>
+            new ViewModels.Inventory
+            {
+                Id = m.Id,
+                Product = m.Product,
+                StoreId = m.StoreId,
+                Price = m.Price,
+                IsSelected = false
+            });
+
+            return View(viewModels);
+        }
+
+        // POST: Orders/Menu
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OrderId,CustomerName,CustomerId,Location,StoreId,DateTime,Order,TotalPrice")] OrderHistory orderHistory)
+        public ActionResult Menu([FromForm] int id, IFormCollection formCollection, IEnumerable<ViewModels.Inventory> products)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(orderHistory);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var order = Repo.GetCurrentOrder();
+                //foreach (var item in products)
+                //{
+                    Repo.AddToOrder(order.Id, id);
+                //}
+                //return RedirectToAction(nameof(FinishOrder));
+                return View("Added to your Order");
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FirstName", orderHistory.CustomerId);
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Location", orderHistory.StoreId);
-            return View(orderHistory);
+            catch
+            {
+                return View();
+            }
         }
 
-        // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        
+        public ActionResult AddToOrder( int id )
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                var order = Repo.GetCurrentOrder();
+                //foreach (var item in products)
+                //{
+                Repo.AddToOrder(order.Id, id);
+                //}
+                //return RedirectToAction(nameof(FinishOrder));
+                return RedirectToAction(nameof(Menu));
             }
-
-            var orderHistory = await _context.OrderHistory.FindAsync(id);
-            if (orderHistory == null)
+            catch
             {
-                return NotFound();
+                return View("Error. Please try again.");
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FirstName", orderHistory.CustomerId);
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Location", orderHistory.StoreId);
-            return View(orderHistory);
         }
 
-        // POST: Orders/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // GET: Orders/Details/5
+        public ActionResult CurrentOrderDetails()
+        {
+            CurrentOrder order = Repo.GetCurrentOrder();
+            var viewModel = new ViewModels.CurrentOrder
+            {
+                OrderId = order.OrderId.Value,
+                CustomerName = order.CustomerName,
+                Location = order.Location,
+                Order = order.Order,
+                TotalPrice = order.TotalPrice,
+            };
+
+            return View(viewModel);
+        }
+
+        // GET: Order/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Order/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OrderId,CustomerName,CustomerId,Location,StoreId,DateTime,Order,TotalPrice")] OrderHistory orderHistory)
+        public ActionResult Create(ViewModels.CurrentOrder viewModel)
         {
-            if (id != orderHistory.OrderId)
-            {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(orderHistory);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderHistoryExists(orderHistory.OrderId))
+                    var order = new CurrentOrder
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                        OrderId = viewModel.OrderId.Value,
+                        CustomerName = viewModel.CustomerName,
+                        CustomerId = viewModel.CustomerId,
+                        Location = viewModel.Location,
+                        StoreId = viewModel.StoreId,
+                        Order = viewModel.Order,
+                        TotalPrice = viewModel.TotalPrice,
+                    };
+
+                    Repo.BeginOrder(order);
+                    Repo.Save();
+
+                    return RedirectToAction(nameof(Menu));
                 }
-                return RedirectToAction(nameof(Index));
+                return View(viewModel);
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "FirstName", orderHistory.CustomerId);
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Location", orderHistory.StoreId);
-            return View(orderHistory);
+            catch
+            {
+                return View(viewModel);
+            }
         }
 
-        // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Order/Edit/5
+        //public ActionResult Edit(int id)
+        //{
+        //    Customer cust = Repo.GetCurrentOrder(id);
+        //    var viewModel = new Models.Customer
+        //    {
+        //        Id = cust.Id,
+        //        FirstName = cust.FirstName,
+        //        LastName = cust.LastName,
+        //        Address = cust.Address,
+        //        PhoneNumber = cust.PhoneNumber
+        //    };
+        //    return View(viewModel);
+        //}
+
+        //// POST: Customer/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Edit(int id, Models.Customer viewModel)
+        //{
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            Customer cust = Repo.GetCustomerById(id);
+        //            cust.FirstName = viewModel.FirstName;
+        //            cust.LastName = viewModel.LastName;
+        //            cust.Address = viewModel.Address;
+        //            cust.PhoneNumber = viewModel.PhoneNumber;
+        //            Repo.UpdateCustomer(cust);
+        //            Repo.Save();
+
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        return View(viewModel);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return View(viewModel);
+        //    }
+        //}
+
+        //GET: Order/FinishOrder/5
+        public ActionResult FinishOrder()
         {
-            if (id == null)
+            CurrentOrder order = Repo.GetCurrentOrder();
+            var viewModel = new ViewModels.CurrentOrder
             {
-                return NotFound();
-            }
-
-            var orderHistory = await _context.OrderHistory
-                .Include(o => o.Customer)
-                .Include(o => o.Store)
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (orderHistory == null)
-            {
-                return NotFound();
-            }
-
-            return View(orderHistory);
+                Id = order.Id,
+                CustomerName = order.CustomerName,
+                Location = order.Location,
+                Order = order.Order,
+                TotalPrice = order.TotalPrice,
+            };
+            return View(viewModel);
         }
 
-        // POST: Orders/Delete/5
-        [HttpPost, ActionName("Delete")]
+        //POST: Order/FinishOrder/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public ActionResult FinishOrder(int  id)
         {
-            var orderHistory = await _context.OrderHistory.FindAsync(id);
-            _context.OrderHistory.Remove(orderHistory);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                CurrentOrder entity = Repo.GetCurrentOrder();
+                var newEntity = new Domain.Models.OrderHistory
+                {
+                    //OrderId = entity.OrderId.Value,
+                    CustomerName = entity.CustomerName,
+                    CustomerId = entity.CustomerId.Value,
+                    Location = entity.Location,
+                    StoreId = entity.StoreId.Value,
+                    Order = entity.Order,
+                    TotalPrice = entity.TotalPrice,
+                    //DateTime = DateTime.Now
+                };
+                
+                Repo.AddOrder(newEntity);
+                //Repo.DecrementInventory();
+                Repo.RemoveCurrentOrder();
+                //Repo.Save();
+
+                return RedirectToAction(nameof(Menu));
+            }
+            catch
+            {
+                return View();
+            }
         }
 
-        private bool OrderHistoryExists(int id)
+        // GET: Customer/Delete/5
+        //public ActionResult Delete(int id)
+        //{
+        //    OrderHistory order = Repo.g;
+        //    var viewModel = new Models.Customer
+        //    {
+        //        Id = cust.Id,
+        //        FirstName = cust.FirstName,
+        //        LastName = cust.LastName,
+        //        Address = cust.Address,
+        //        PhoneNumber = cust.PhoneNumber
+        //    };
+        //    return View(viewModel);
+        //}
+
+        //// POST: Order/Delete/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Delete(int id, [BindNever]IFormCollection collection)
+        //{
+        //    try
+        //    {
+        //        Repo.DeleteCustomer(id);
+        //        Repo.Save();
+
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    catch
+        //    {
+        //        return View();
+        //    }
+        //}
+
+        public ActionResult StoreHistory(int storeId)
         {
-            return _context.OrderHistory.Any(e => e.OrderId == id);
+            storeId = int.Parse(TempData["StoreId"].ToString());
+            IEnumerable<OrderHistory> items = Repo.OrderHistoryByCustomerId(storeId);
+            IEnumerable<ViewModels.OrderHistory> orders = items.Select(s =>
+            new ViewModels.OrderHistory
+            {
+                OrderId = s.OrderId,
+                CustomerName = s.CustomerName,
+                CustomerId = s.CustomerId,
+                Location = s.Location,
+                StoreId = s.StoreId,
+                DateTime = s.DateTime.Value,
+                Order = s.Order,
+                TotalPrice = s.TotalPrice
+            });
+
+            return View(orders);
         }
+
+        //GET: Orders/CustomerHistory
+        public ActionResult CustomerHistory()
+        {
+            int custId = int.Parse(TempData["CustomerId"].ToString());
+            IEnumerable<OrderHistory> items = Repo.OrderHistoryByCustomerId(custId);
+            IEnumerable<ViewModels.OrderHistory> orders = items. Select(s =>
+            new ViewModels.OrderHistory
+            {
+                OrderId = s.OrderId,
+                CustomerName = s.CustomerName,
+                CustomerId = s.CustomerId,
+                Location = s.Location,
+                StoreId = s.StoreId,
+                DateTime = s.DateTime.Value,
+                Order = s.Order,
+                TotalPrice = s.TotalPrice
+            });
+
+            return View(orders);
+        }
+
     }
 }

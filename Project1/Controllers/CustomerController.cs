@@ -20,24 +20,24 @@ namespace Project1.Controllers
         // GET: Customer
         public ActionResult Index([FromQuery]string search = "")
         {
-            IEnumerable<Customer> cust = Repo.GetCustomers(search);
-            IEnumerable<Models.Customer> viewModels = cust.Select(c => new Models.Customer
-            {
-                Id = c.Id,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Address = c.Address,
-                PhoneNumber = c.PhoneNumber
-            });
+            //IEnumerable<Customer> cust = Repo.GetCustomerByFullName(search, search);
+            //IEnumerable<ViewModels.Customer> viewModels = cust.Select(c => new ViewModels.Customer
+            //{
+            //    Id = c.Id,
+            //    FirstName = c.FirstName,
+            //    LastName = c.LastName,
+            //    Address = c.Address,
+            //    PhoneNumber = c.PhoneNumber
+            //});
 
-            return View(viewModels);
+            return View();
         }
 
         // GET: Customer/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Details([FromRoute]int id)
         {
             Customer cust = Repo.GetCustomerById(id);
-            var viewModel = new Models.Customer
+            var viewModel = new ViewModels.Customer
             {
                 Id = cust.Id,
                 FirstName = cust.FirstName,
@@ -45,20 +45,85 @@ namespace Project1.Controllers
                 Address = cust.Address,
                 PhoneNumber = cust.PhoneNumber
             };
-
+            TempData["CustomerId"] = cust.Id;
             return View(viewModel);
         }
 
-        // GET: Customer/Create
-        public ActionResult Create()
+        // POST: Customer/Details/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Details(int id, IFormCollection collection)
+        {
+            try
+            {
+                Customer cust = Repo.GetCustomerById(id);
+                CurrentOrder newOrder = new CurrentOrder
+                {
+                    CustomerName = cust.FirstName + " " + cust.LastName,
+                    CustomerId = cust.Id
+                };
+
+                Repo.BeginOrder(newOrder);
+                Repo.Save();
+
+                return RedirectToAction("Index", "Store");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+            // GET: Customer/LoginCustomer
+            public ActionResult LoginCustomer()
         {
             return View();
         }
 
-        // POST: Customer/Create
+        // POST: Customer/LoginCustomer
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("Name")]Models.Customer viewModel)
+        public ActionResult LoginCustomer([Bind("FirstName", "LastName")]ViewModels.Login viewModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    string firstName = viewModel.FirstName;
+                    string lastName = viewModel.LastName;
+
+                    var cust = Repo.GetCustomerByFullName(firstName, lastName);
+                    if(cust.FirstName == null)
+                    {
+                        return RedirectToAction(nameof(CustomerNotFound));
+                    }
+
+                    return RedirectToAction(nameof(Details), new { id = cust.Id });
+                }
+                return View(viewModel);
+            }
+            catch
+            {
+                return View(viewModel);
+            }
+        }
+
+        // GET: Customer/CustomerNotFound
+        public ActionResult CustomerNotFound()
+        {
+            return View();
+        }
+
+        // GET: Customer/AddCustomer
+        public ActionResult AddCustomer()
+        {
+            return View();
+        }
+
+        // POST: Customer/AddCustomer
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddCustomer(ViewModels.Customer viewModel)
         {
             try
             {
@@ -74,7 +139,7 @@ namespace Project1.Controllers
                     Repo.AddCustomer(cust);
                     Repo.Save();
 
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(LoginCustomer));
                 }
                 return View(viewModel);
             }
@@ -88,7 +153,7 @@ namespace Project1.Controllers
         public ActionResult Edit(int id)
         {
             Customer cust = Repo.GetCustomerById(id);
-            var viewModel = new Models.Customer
+            var viewModel = new ViewModels.Customer
             {
                 Id = cust.Id,
                 FirstName = cust.FirstName,
@@ -102,7 +167,7 @@ namespace Project1.Controllers
         // POST: Customer/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Models.Customer viewModel)
+        public ActionResult Edit(int id, ViewModels.Customer viewModel)
         {
             try
             {
@@ -130,7 +195,7 @@ namespace Project1.Controllers
         public ActionResult Delete(int id)
         {
             Customer cust = Repo.GetCustomerById(id);
-            var viewModel = new Models.Customer
+            var viewModel = new ViewModels.Customer
             {
                 Id = cust.Id,
                 FirstName = cust.FirstName,

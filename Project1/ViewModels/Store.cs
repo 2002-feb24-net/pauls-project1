@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Project1.Models
+namespace Project1.ViewModels
 {
     public class Store
     {
@@ -18,6 +19,8 @@ namespace Project1.Models
         [Required]
         [Phone]
         public long PhoneNumber { get; set; }
+
+        public IEnumerable<Store> DropDownList { get; set; }
 
     }
 }

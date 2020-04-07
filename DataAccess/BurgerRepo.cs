@@ -70,14 +70,14 @@ namespace DataAccess
             };
 
             entity.StoreId = 0;
-            _dbContext.Add(entity);
+            _dbContext.Stores.Add(entity);
         }
 
         public void DeleteStore(int storeId)
         {
             _logger.LogInformation("Deleting store with ID {storeId}", storeId);
             Stores entity = _dbContext.Stores.Find(storeId);
-            _dbContext.Remove(entity);
+            _dbContext.Stores.Remove(entity);
         }
 
         public void UpdateStore(Store store)
@@ -112,26 +112,24 @@ namespace DataAccess
             };
 
             entity.Id = 0;
-            _dbContext.Add(entity);
+            _dbContext.Customers.Add(entity);
         }
 
 
-        public IEnumerable<Domain.Models.Customer> GetCustomers(string search = null)
+        public Customer GetCustomerByFullName(string firstName, string lastName)
         {
-            IEnumerable<Entities.Customers> items = _dbContext.Customers
-                .AsNoTracking();
+            Customers items = _dbContext.Customers.Where(c => 
+            c.FirstName == firstName && c.LastName == lastName).FirstOrDefault();
 
-            items = items.Where(c => c.LastName.Contains(search)).AsEnumerable();
-
-            IEnumerable<Domain.Models.Customer> newItems = items.Select(cust =>
+            Customer newItems = 
             new Customer
             {
-                Id = cust.Id,
-                FirstName = cust.FirstName,
-                LastName = cust.LastName,
-                Address = cust.Address,
-                PhoneNumber = Int64.Parse(cust.PhoneNumber)
-            });
+                Id = items.Id,
+                FirstName = items.FirstName,
+                LastName = items.LastName,
+                Address = items.Address,
+                PhoneNumber = Int64.Parse(items.PhoneNumber)
+            };
 
             return newItems;
         }
@@ -140,7 +138,7 @@ namespace DataAccess
         {
             _logger.LogInformation("Deleting customer with ID {custId}", custId);
             Customers entity = _dbContext.Customers.Find(custId);
-            _dbContext.Remove(entity);
+            _dbContext.Customers.Remove(entity);
         }
 
         public void UpdateCustomer(Customer cust)
@@ -175,26 +173,6 @@ namespace DataAccess
             return customer;
         }
 
-        public IEnumerable<Customer> GetCustomerByName(string search = null)
-        {
-            IEnumerable<Customers> items = _dbContext.Customers
-                .AsNoTracking();
-
-            items = items.Where(c => c.LastName.Contains(search)).AsEnumerable();
-
-            IEnumerable<Customer> newItems = items.Select(c =>
-            new Customer
-            {
-                Id = c.Id,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Address = c.Address,
-                PhoneNumber = Int64.Parse(c.PhoneNumber)
-            });
-
-            return newItems;
-        }
-
         public void AddOrder(Domain.Models.OrderHistory order)
         {
             if (order.OrderId != 0)
@@ -210,12 +188,13 @@ namespace DataAccess
                 CustomerId = order.CustomerId,
                 Location = order.Location,
                 StoreId = order.StoreId,
-                DateTime = order.DateTime,
+                DateTime = DateTime.Now,
                 Order = order.Order,
-                TotalPrice = order.TotalPrice
+                TotalPrice = order.TotalPrice,
             };
 
-            _dbContext.Add(newEntity);
+            _dbContext.OrderHistory.Add(newEntity);
+            _dbContext.SaveChanges();
         }
 
         public void DeleteOrder(int orderId)
@@ -223,7 +202,7 @@ namespace DataAccess
             _logger.LogInformation("Deleting order with ID {orderId}", orderId);
 
             Entities.OrderHistory entity = _dbContext.OrderHistory.Find(orderId);
-            _dbContext.Remove(entity);
+            _dbContext.OrderHistory.Remove(entity);
         }
 
         public void UpdateOrder(Domain.Models.OrderHistory order)
@@ -237,7 +216,7 @@ namespace DataAccess
                 CustomerId = order.CustomerId,
                 Location = order.Location,
                 StoreId = order.StoreId,
-                DateTime = order.DateTime,
+                //DateTime = order.DateTime,
                 Order = order.Order,
                 TotalPrice = order.TotalPrice
             };
@@ -255,6 +234,7 @@ namespace DataAccess
             IEnumerable<Domain.Models.OrderHistory> newItems = items.Select(s =>
             new Domain.Models.OrderHistory
             {
+                OrderId = s.OrderId,
                 CustomerName = s.CustomerName,
                 CustomerId = s.CustomerId,
                 Location = s.Location,
@@ -298,6 +278,96 @@ namespace DataAccess
                 .SingleOrDefault();
 
             entity.Quantity -= 1;
+        }
+
+        public IEnumerable<Domain.Models.Inventory> DisplayMenu(int storeId)
+        {
+            IEnumerable<Entities.Inventory> items = _dbContext.Inventory
+                .AsNoTracking();
+
+            items = items.Where(m => m.StoreId == storeId).AsEnumerable();
+
+            IEnumerable<Domain.Models.Inventory> newItems = items.Select(m =>
+            new Domain.Models.Inventory
+            {
+                Id = m.Id,
+                Product = m.Product,
+                StoreId = m.StoreId,
+                Quantity = m.Quantity,
+                Price = m.Price
+            });
+
+            return newItems;
+        }
+
+        public void BeginOrder(Domain.Models.CurrentOrder order)
+        {
+            
+            _logger.LogInformation("Starting order.");
+
+            Entities.CurrentOrder newEntity = new Entities.CurrentOrder
+            {
+                CustomerName = order.CustomerName,
+                CustomerId = order.CustomerId,
+                TotalPrice = 0
+            };
+
+            _dbContext.CurrentOrder.Add(newEntity);
+        }
+
+        public void AddStoreToOrder(Domain.Models.CurrentOrder order)
+        {
+            _logger.LogInformation("Updating current order with store info of store #{StoreId}", order.StoreId);
+
+            Entities.CurrentOrder currentEntity = _dbContext.CurrentOrder.First();
+            
+            //currentEntity.CustomerName = order.CustomerName;
+            //currentEntity.CustomerId = order.CustomerId;
+            currentEntity.Location = order.Location;
+            currentEntity.StoreId = order.StoreId;
+                           
+            _dbContext.SaveChanges();
+        }
+
+        public void AddToOrder(int orderId, int prodId)
+        {
+            Entities.CurrentOrder order = _dbContext.CurrentOrder
+                .First();
+            Entities.Inventory product = _dbContext.Inventory
+                .Where(p => p.Id == prodId).SingleOrDefault();
+            
+            order.Order += product.Product + " + ";
+            order.TotalPrice += product.Price;
+
+            _dbContext.SaveChanges();
+
+            return;
+        }
+
+        public Domain.Models.CurrentOrder GetCurrentOrder()
+        {
+            Entities.CurrentOrder order = _dbContext.CurrentOrder.First();
+            Domain.Models.CurrentOrder newEntity = new Domain.Models.CurrentOrder
+            {
+                Id = order.Id,
+                CustomerName = order.CustomerName,
+                CustomerId = order.CustomerId,
+                Location = order.Location,
+                StoreId = order.StoreId,
+                Order = order.Order,
+                TotalPrice = order.TotalPrice
+            };
+
+            return newEntity;
+        }
+
+        public void RemoveCurrentOrder()
+        {
+            _logger.LogInformation("Moving current order from CurrentOrder to OrderHistory");
+
+            Entities.CurrentOrder entity = _dbContext.CurrentOrder.First();
+            _dbContext.CurrentOrder.Remove(entity);
+            _dbContext.SaveChanges();
         }
 
         public void Save()

@@ -1,0 +1,76 @@
+﻿@model IEnumerable<Project1.ViewModels.Inventory>
+
+@{
+    ViewData["Title"] = "Menu";
+}
+
+<h1>Menu</h1>
+
+<p>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+
+
+            <th></th>
+        </tr>
+    </thead>
+    
+        @using (Html.BeginForm("Menu", "Orders", FormMethod.Post))
+        {
+<tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Product)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                <a asp-action="AddToOrder" asp-route-id="@item.Id">Add to Order</a>
+                
+            </td>
+            @*<td>
+                    <label for="@item.Id"> Add to Order</label>
+                    <input type="checkbox" id="@item.Id" name="@item.Id" value=".">
+                </td>
+                <td>
+                    <label for="@item.Id"> Remove from Order</label>
+                    <input type="checkbox" id="@item.Id" name="@item.Id" value="@item.Id">
+                </td>*@
+        </tr>
+    }
+</tbody>
+            
+        }
+</table>
+@*<input type="submit" value="Continue" class="btn btn-primary" />*@
+<div>
+    <form asp-action="FinishOrder" method="get">
+        <input type="submit" value="Continue" class="btn btn-primary" />
+    </form>
+    
+</div>
+<div>
+    <a asp-controller="Store" asp-action="Index">Back to Store Selection</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,64 @@
+﻿@model Project1.ViewModels.CurrentOrder
+
+@{
+    ViewData["Title"] = "Finish Order";
+}
+
+@*<h1>Edit</h1>*@
+
+<h4>Your Order</h4>
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Order)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalPrice)
+            </th>
+
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr>
+            <td>
+                @Html.DisplayFor(model => model.CustomerName)            
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Location)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Order)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.TotalPrice)
+            </td>
+
+            @*<td>
+                <a asp-action="Add" asp-route-id="@Model.Id">Add to order</a> |
+                <a asp-action="Remove" asp-route-id="@Model.Id">Remove from order</a>
+            </td>*@
+        </tr>
+        
+    </tbody>
+</table>
+<form asp-action="FinishOrder" method="post">
+    <input type="submit" value="Place Order" id="@Model.Id" class="btn btn-primary" />
+</form>
+<p>
+    @*<input asp-action="FinishOrder" method="post" id="@Model.Id">Finish Order</input>*@
+</p>
+
+
+

@@ -1,6 +1,5 @@
 ﻿using Domain.Models;
 using System.Collections.Generic;
-
 namespace Domain
 {
     /// <summary>
@@ -32,8 +31,7 @@ namespace Domain
         /// <param name="cust">The customer</param>
         void AddCustomer(Customer cust);
 
-        IEnumerable<Domain.Models.Customer> GetCustomers(string search = null);
-
+        Customer GetCustomerByFullName(string firstName, string lastName);
 
         /// <summary>
         /// Delete a customer by ID. Any orders associated to it will also be deleted.
@@ -52,8 +50,6 @@ namespace Domain
         /// </summary>
         /// <param int="custId">The ID of the customer</param>
         Customer GetCustomerById(int custId);
-
-        IEnumerable<Customer> GetCustomerByName(string search);
 
 
         /// <summary>
@@ -92,6 +88,17 @@ namespace Domain
 
         void DecrementInventory(string product, int storeId);
 
+        IEnumerable<Domain.Models.Inventory> DisplayMenu(int storeId);
+
+        void BeginOrder(Domain.Models.CurrentOrder order);
+
+        void AddStoreToOrder(Domain.Models.CurrentOrder order);
+
+        void AddToOrder(int orderId, int prodId);
+
+        Domain.Models.CurrentOrder GetCurrentOrder();
+
+        void RemoveCurrentOrder();
 
         /// <summary>
         /// Persist changes to the data source.
