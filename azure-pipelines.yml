@@ -1,10 +1,6 @@
 trigger:
-  branches:
-    include:
-    - master
-  paths:
-    exclude:
-    - README.md
+- master
+
 
 pr:
 - master
@@ -13,12 +9,6 @@ stages:
 
 - stage: build
   displayName: build
-
-  variables:
-    sdkVersion: 3.1.102
-    solutionPath: ./Project1/*.sln
-    buildConfiguration: Release
-    dotnetSdkVersion: '3.1.102'
 
   jobs:
 
@@ -30,44 +20,11 @@ stages:
 
     steps:
 
-    - task: UseDotNet@2
-      displayName: 'Install .NET Core sdk'
-      inputs:
-        packageType: sdk
-        version: 3.1.102
-        installationPath: $(Agent.ToolsDirectory)/dotnet
+    - script: |
+        dotnet build
+      displayName: 'dotnet build'
 
-    - task: UseDotNet@2
-      displayName: 'Install SDK 2.1.804'
-      inputs:
-        version: 2.1.804
-
-    - task: DotNetCoreInstaller@0
-      displayName: 'Use .NET Core SDK 3.1.102'
-      inputs:
-        version: '3.1.102'
-
-    - task: UseDotNet@2
-      inputs:
-        packageType: sdk
-        version: 3.1.102
-      displayName: dotnet 3.1.102
-
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: publish
-        publishWebProjects: true
-        arguments:
-          --configuration $(buildConfiguration)
-          --output $(Build.ArtifactStagingDirectory)/publish
-        modifyOutputPath: false
-        zipAfterPublish: false
-      displayName: dotnet publish
-
-    - publish: $(Build.ArtifactStagingDirectory)/publish
-      artifact: app
-      displayName: artifact publish app
-
+   
   - job: test
     displayName: test
 
@@ -88,35 +45,16 @@ stages:
       continueOnError: true
       displayName: sonarcloud analysis prepare
 
-    - task: UseDotNet@2
-      inputs:
-        packageType: sdk
-        version: 3.1.102
-      displayName: dotnet 3.1.102
-
-    - script: dotnet build $(solutionPath)
-        --configuration $(buildConfiguration)
-      displayName: dotnet build
-
-#    - script: dotnet test $(solutionPath)
-#        --configuration $(buildConfiguration)
-#        --collect "XPlat Code Coverage"
-#        --logger trx
-#        --no-build
-#        --results-directory $(Common.TestResultsDirectory)
-#      continueOnError: true
-#      displayName: dotnet test
-
     - task: SonarCloudAnalyze@1
       continueOnError: true
       displayName: sonarcloud analysis run
 
-#    - task: PublishTestResults@2
-#      condition: succeededOrFailed()
-#      inputs:
-#        testRunner: VSTest
-#        testResultsFiles: $(Common.TestResultsDirectory)/*.trx
-#      displayName: test results build publish
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: $(Common.TestResultsDirectory)/*.trx
+      displayName: test results build publish
 
     - task: PublishCodeCoverageResults@1
       condition: succeededOrFailed()
@@ -125,6 +63,11 @@ stages:
         summaryFileLocation: $(Common.TestResultsDirectory)/*/coverage.cobertura.xml
       displayName: code coverage build publish
     
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+
     - task: SonarCloudPublish@1
       condition: succeededOrFailed()
       displayName: sonarcloud results build publish
