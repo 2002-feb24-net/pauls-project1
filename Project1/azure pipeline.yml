@@ -1,0 +1,110 @@
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - README.md
+
+pr:
+- master
+
+stages:
+
+- stage: build
+  displayName: build
+
+  variables:
+    sdkVersion: 3.1.x
+    solutionPath: ./Project1/*.sln
+    buildConfiguration: Release
+
+  jobs:
+
+  - job: build
+    displayName: build
+
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: sdk
+        version: $(sdkVersion)
+      displayName: dotnet $(sdkVersion)
+
+   
+
+  - job: test
+    displayName: test
+
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+
+    - script: dotnet build $(solutionPath)
+        --configuration $(buildConfiguration)
+      displayName: dotnet build
+
+    - script: dotnet test $(solutionPath)
+        --configuration $(buildConfiguration)
+        --collect "XPlat Code Coverage"
+        --logger trx
+        --no-build
+        --results-directory $(Common.TestResultsDirectory)
+      continueOnError: true
+      displayName: dotnet test
+
+    
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: $(Common.TestResultsDirectory)/*.trx
+      displayName: test results build publish
+
+    - task: PublishCodeCoverageResults@1
+      condition: succeededOrFailed()
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: $(Common.TestResultsDirectory)/*/coverage.cobertura.xml
+      displayName: code coverage build publish
+    
+    
+
+- stage: deploy
+  displayName: deploy
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  dependsOn: build
+
+  jobs:
+
+  - deployment: deploy_dev
+    displayName: deploy dev
+
+    pool:
+      vmImage: ubuntu-latest
+
+    environment: dev
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - download: current
+            artifact: app
+            displayName: artifact download app# ASP.NET Core
+
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure subscription 1(4)(34c1f765-2be7-443c-b6cc-1dfb59828d08)'
+              appType: 'webApp'
+              WebAppName: 'GoodBurger'
+              packageForLinux: '$(Pipeline.Workspace)/app'
+            displayName: Website Deployment
