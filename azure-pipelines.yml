@@ -15,9 +15,10 @@ stages:
   displayName: build
 
   variables:
-    sdkVersion: 3.2.x
+    #sdkVersion: 3.2.x
     solutionPath: ./Project1/*.sln
     buildConfiguration: Release
+    dotnetSdkVersion: '3.1.101'
 
   jobs:
 
@@ -29,10 +30,15 @@ stages:
 
     steps:
 
+    - task: DotNetCoreInstaller@0
+      displayName: 'Use .NET Core SDK $(dotnetSdkVersion)'
+      inputs:
+        version: '$(dotnetSdkVersion)'
+
     - task: UseDotNet@2
       inputs:
         packageType: sdk
-        version: $(sdkVersion)
+        version: 3.1.x
       displayName: dotnet $(sdkVersion)
 
     - task: DotNetCoreCLI@2
