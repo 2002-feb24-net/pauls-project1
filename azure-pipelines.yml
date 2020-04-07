@@ -15,10 +15,10 @@ stages:
   displayName: build
 
   variables:
-    sdkVersion: 3.1.101
+    sdkVersion: 2.2.203
     solutionPath: ./Project1/*.sln
     buildConfiguration: Release
-    dotnetSdkVersion: '3.1.101'
+    dotnetSdkVersion: '2.2.203'
 
   jobs:
 
@@ -38,7 +38,7 @@ stages:
     - task: UseDotNet@2
       inputs:
         packageType: sdk
-        version: 3.1.101
+        version: 2.2.203
       displayName: dotnet $(sdkVersion)
 
     - task: DotNetCoreCLI@2
