@@ -139,47 +139,7 @@ namespace Project1.Controllers
             }
         }
 
-        // GET: Order/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    Customer cust = Repo.GetCurrentOrder(id);
-        //    var viewModel = new Models.Customer
-        //    {
-        //        Id = cust.Id,
-        //        FirstName = cust.FirstName,
-        //        LastName = cust.LastName,
-        //        Address = cust.Address,
-        //        PhoneNumber = cust.PhoneNumber
-        //    };
-        //    return View(viewModel);
-        //}
-
-        //// POST: Customer/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, Models.Customer viewModel)
-        //{
-        //    try
-        //    {
-        //        if (ModelState.IsValid)
-        //        {
-        //            Customer cust = Repo.GetCustomerById(id);
-        //            cust.FirstName = viewModel.FirstName;
-        //            cust.LastName = viewModel.LastName;
-        //            cust.Address = viewModel.Address;
-        //            cust.PhoneNumber = viewModel.PhoneNumber;
-        //            Repo.UpdateCustomer(cust);
-        //            Repo.Save();
-
-        //            return RedirectToAction(nameof(Index));
-        //        }
-        //        return View(viewModel);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return View(viewModel);
-        //    }
-        //}
+        
 
         //GET: Order/FinishOrder/5
         public ActionResult FinishOrder()
